@@ -25,8 +25,7 @@ public class ObjFileConverter {
         StringBuilder sb_faces = new StringBuilder();
         for (int x = 0; x < matrix.length; x++) {
             for (int y = 0; y < matrix[x].length; y++) {
-                //sb_vertex.append("v " + x * xyScale + " " + y * xyScale + " " + matrix[x][y] + "\n");
-                sb_vertex.append("v " + x * xyScale + " " + matrix[x][y] + " " + y * xyScale + "\n");
+                sb_vertex.append("v " + x * xyScale + " " + y * xyScale + " " + matrix[x][y] + "\n");
             }
         }
 
