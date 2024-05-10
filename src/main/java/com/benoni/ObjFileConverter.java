@@ -6,9 +6,7 @@ import java.io.IOException;
 
 public class ObjFileConverter {
 
-    private static final double xyScale = 1;
-
-    public static void matrixToFile(double[][] matrix) throws IOException {
+    public static void matrixToFile(Vertex[][] matrix) throws IOException {
         String contents = buildFileContents(matrix);
         File out = new File("terrain.obj");
         if (out.exists()) {
@@ -20,12 +18,17 @@ public class ObjFileConverter {
         fw.close();
     }
 
-    private static String buildFileContents(double[][] matrix) {
-        StringBuilder sb_vertex = new StringBuilder();
+    private static String buildFileContents(Vertex[][] matrix) {
+        String comment = DiamondSquare.generateExtremaComment(matrix);
+        StringBuilder sb_vertexV = new StringBuilder();
+        StringBuilder sb_vertexVn = new StringBuilder();
+        StringBuilder sb_vertexVt = new StringBuilder();
         StringBuilder sb_faces = new StringBuilder();
         for (int x = 0; x < matrix.length; x++) {
             for (int y = 0; y < matrix[x].length; y++) {
-                sb_vertex.append("v " + x * xyScale + " " + y * xyScale + " " + matrix[x][y] + "\n");
+                sb_vertexV.append(matrix[x][y].toWavefrontObjStrV());
+                sb_vertexVn.append(matrix[x][y].toWavefrontObjStrVn());
+                sb_vertexVt.append(matrix[x][y].toWavefrontObjStrVt());
             }
         }
 
@@ -35,6 +38,6 @@ public class ObjFileConverter {
                 sb_faces.append("f " + (y * matrix.length + x + 1) + " " + (y * matrix.length + x + 2) + " " + (y * matrix.length + x + matrix.length + 2) + "\n");
             }
         }
-        return sb_vertex.toString() + sb_faces;
+        return comment + sb_vertexV + /*sb_vertexVt +*/ sb_vertexVn + sb_faces;
     }
 }
