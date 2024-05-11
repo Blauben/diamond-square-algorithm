@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        Vertex[][] matrix = DiamondSquare.createLandscape(5);
+        Vertex[][] matrix = DiamondSquare.createLandscape(7);
         try {
             ObjFileConverter.matrixToFile(matrix);
         } catch (IOException e) {

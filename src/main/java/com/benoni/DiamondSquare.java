@@ -141,7 +141,7 @@ public class DiamondSquare {
 
     private static double[] normalize(double[] vector) {
         double[] res = vector.clone();
-        double vecLength = Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+        double vecLength = Math.sqrt(dotProduct(vector, vector));
         for (int i = 0; i < res.length; i++) {
             res[i] /= vecLength;
         }
@@ -181,7 +181,11 @@ public class DiamondSquare {
     private static double[] calculateTriangleNormal(Vertex A, Vertex B, Vertex C) {
         double[] AB = subtractVectors(B.xyz, A.xyz);
         double[] CA = subtractVectors(C.xyz, A.xyz);
-        return crossProduct(AB, CA);
+        double[] normal = crossProduct(AB, CA);
+        if (dotProduct(normal, new double[]{0, 0, 1}) < 0) {
+            return matrixVectorMultiplication(new double[][]{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}}, normal);
+        }
+        return normal;
     }
 
     private static double[] subtractVectors(double[] v1, double[] v2) {
@@ -200,6 +204,10 @@ public class DiamondSquare {
         return res;
     }
 
+    private static double dotProduct(double[] a, double[] b) { //TODO delete
+        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    }
+
     private static void calculateTextureCoord(Vertex[][] landscape) {
         double terrainLengthX = Math.abs(landscape[0][0].xyz[Vertex.X] - landscape[landscape.length - 1][landscape[0].length - 1].xyz[Vertex.X]);
         double terrainLengthY = Math.abs(landscape[0][0].xyz[Vertex.Y] - landscape[landscape.length - 1][landscape[0].length - 1].xyz[Vertex.Y]);
@@ -213,7 +221,14 @@ public class DiamondSquare {
         }
     }
 
-    private static double dot(double[] a, double[] b) { //TODO delete
-        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    private static double[] matrixVectorMultiplication(double[][] matrix, double[] vector) {
+        assert vector.length == matrix[0].length;
+        double[] res = new double[matrix.length];
+        for (int row = 0; row < matrix.length; row++) {
+            for (int col = 0; col < matrix[0].length; col++) {
+                res[row] += matrix[row][col] * vector[col];
+            }
+        }
+        return res;
     }
 }
