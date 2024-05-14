@@ -1,5 +1,6 @@
 package com.benoni;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,8 +9,8 @@ import java.util.Random;
 public class DiamondSquare {
 
     private static final Random rand = new Random();
-    private static final double roughness = 1.3;
-    private static double sigma = 15;
+    private static final double roughness = 1;
+    private static double sigma = 5;
 
     public static Vertex[][] createLandscape(int size_exp) {
         int size = (int) Math.pow(2, size_exp) + 1;
@@ -121,20 +122,19 @@ public class DiamondSquare {
     }
 
     private static void calculateNormals(Vertex[][] landscape) {
-        List<double[]>[][] normals = setupNormalsList(landscape.length, landscape[0].length);
-        calculateAdjacentNormals(landscape, normals);
+        calculateAdjacentNormals(landscape);
         for (int i = 0; i < landscape.length; i++) {
             for (int j = 0; j < landscape[0].length; j++) {
-                landscape[i][j].n = normalize(average(normals[i][j]));
+                landscape[i][j].n = normalize(landscape[i][j].n);
             }
         }
     }
 
-    private static double[] average(List<double[]> vectors) {
-        double[] res = new double[3];
+    private static double[] sum(double[] v1, double[] v2) {
+        assert v1.length == v2.length;
+        double[] res = new double[v1.length];
         for (int i = 0; i < res.length; i++) {
-            final int index = i;
-            res[index] = vectors.stream().map(v -> v[index]).reduce(0.0, Double::sum) / vectors.size();
+            res[i] = v1[i] + v2[i];
         }
         return res;
     }
@@ -148,40 +148,30 @@ public class DiamondSquare {
         return res;
     }
 
-    private static List<double[]>[][] setupNormalsList(int dimX, int dimY) {
-        ArrayList<double[]>[][] normals = new ArrayList[dimX][dimY];
-        for (int i = 0; i < dimX; i++) {
-            for (int j = 0; j < dimY; j++) {
-                normals[i][j] = new ArrayList<>();
-            }
-        }
-        return normals;
-    }
-
-    private static void calculateAdjacentNormals(Vertex[][] landscape, List<double[]>[][] normals) {
+    private static void calculateAdjacentNormals(Vertex[][] landscape) {
         assert landscape.length == landscape[0].length && landscape.length > 1;
         for (int y = 1; y < landscape[0].length; y++) {
             for (int x = 1; x < landscape.length; x++) {
                 Vertex A = landscape[x][y];
                 Vertex B = landscape[x - 1][y];
                 Vertex C = landscape[x - 1][y - 1];
-                double[] normal = normalize(calculateTriangleNormal(A, B, C));
-                normals[x][y].add(normal);
-                normals[x - 1][y].add(normal);
-                normals[x - 1][y - 1].add(normal);
+                double[] normal = calculateTriangleNormal(A, B, C);
+                A.n = sum(A.n, normal);
+                B.n = sum(B.n, normal);
+                C.n = sum(C.n, normal);
                 B = landscape[x][y - 1];
-                normal = normalize(calculateTriangleNormal(A, B, C));
-                normals[x][y].add(normal);
-                normals[x][y - 1].add(normal);
-                normals[x - 1][y - 1].add(normal);
+                normal = calculateTriangleNormal(A, B, C);
+                A.n = sum(A.n, normal);
+                B.n = sum(B.n, normal);
+                C.n = sum(C.n, normal);
             }
         }
     }
 
     private static double[] calculateTriangleNormal(Vertex A, Vertex B, Vertex C) {
         double[] AB = subtractVectors(B.xyz, A.xyz);
-        double[] CA = subtractVectors(C.xyz, A.xyz);
-        double[] normal = crossProduct(AB, CA);
+        double[] AC = subtractVectors(C.xyz, A.xyz);
+        double[] normal = normalize(crossProduct(AB, AC));
         if (dotProduct(normal, new double[]{0, 0, 1}) < 0) {
             return matrixVectorMultiplication(new double[][]{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}}, normal);
         }
@@ -230,5 +220,11 @@ public class DiamondSquare {
             }
         }
         return res;
+    }
+
+    public static void main(String[] args) throws IOException { // TODO remove after testing
+        Vertex[][] landscape = new Vertex[][]{{new Vertex(-1, 1, 0), new Vertex(0, 1, 0), new Vertex(1, 1, 0)}, {new Vertex(-1, 0, 0), new Vertex(0, 0, 2), new Vertex(1, 0, 0)}, {new Vertex(-1, -1, 0), new Vertex(0, -1, 0), new Vertex(1, -1, 0)}};
+        calculateNormals(landscape);
+        ObjFileConverter.matrixToFile(landscape);
     }
 }

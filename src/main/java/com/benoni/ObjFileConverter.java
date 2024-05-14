@@ -34,10 +34,15 @@ public class ObjFileConverter {
 
         for (int y = 0; y < matrix.length - 1; y++) {
             for (int x = 0; x < matrix.length - 1; x++) {
-                sb_faces.append("f " + (y * matrix.length + x + 1) + " " + (y * matrix.length + x + matrix.length + 1) + " " + (y * matrix.length + x + matrix.length + 2) + "\n");
-                sb_faces.append("f " + (y * matrix.length + x + 1) + " " + (y * matrix.length + x + 2) + " " + (y * matrix.length + x + matrix.length + 2) + "\n");
+                int fx = y * matrix.length + x + 1;
+                int fy = (y + 1) * matrix.length + x + 1;
+                int fz = (y + 1) * matrix.length + x + 2;
+                sb_faces.append(String.format("f %1$s/%1$s/%1$s %2$s/%2$s/%2$s %3$s/%3$s/%3$s\n", fx, fy, fz));
+                fx = y * matrix.length + x + 1;
+                fy = y * matrix.length + x + 2;
+                sb_faces.append(String.format("f %1$s/%1$s/%1$s %2$s/%2$s/%2$s %3$s/%3$s/%3$s\n", fx, fy, fz));
             }
         }
-        return comment + sb_vertexV + /*sb_vertexVt +*/ sb_vertexVn + sb_faces;
+        return comment + sb_vertexV + sb_vertexVt + sb_vertexVn + sb_faces;
     }
 }

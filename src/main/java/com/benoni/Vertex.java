@@ -5,6 +5,7 @@ public class Vertex {
     public static final int X = 0;
     public static final int Y = 1;
     public static final int Z = 2;
+    private static final double xy_scale = 0.2;
     double[] xyz;
     double[] n;
     double[] tc;
@@ -17,8 +18,8 @@ public class Vertex {
 
     public Vertex(double x, double y, double z) {
         this();
-        this.xyz[0] = x;
-        this.xyz[1] = y;
+        this.xyz[0] = x * xy_scale;
+        this.xyz[1] = y * xy_scale;
         this.xyz[Vertex.Z] = z;
     }
 
